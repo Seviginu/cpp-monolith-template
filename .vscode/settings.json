@@ -3,7 +3,14 @@
         "-compile-commands-dir=./build",
         "-header-insertion=never"
     ],
-    "clang-format.executable": "/home/itmo_os2/os/cpp-monolith-template/.clang-format",
+    "clang-format.executable": "",
     "editor.formatOnSave": true,
     "files.eol": "\n",
+    "clang-format.fallbackStyle": "Google",
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "C_Cpp.clang_format_path": "",
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_sortIncludes": null,
+    "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+    "clang-format.assumeFilename": "/home/itmo_os2/os/cpp-monolith-template/.clang-format",
 }
