@@ -3,5 +3,7 @@
         "-compile-commands-dir=./build",
         "-header-insertion=never"
     ],
+    "clang-format.executable": "/home/itmo_os2/os/cpp-monolith-template/.clang-format",
+    "editor.formatOnSave": true,
     "files.eol": "\n",
 }
