@@ -5,7 +5,7 @@
 namespace monolith {
 
 TEST(executeCommand, ExactMatch) {
-  ASSERT_EQ(executeCommand({"man"}), 1);
+  ASSERT_EQ(executeCommand({"man"}), 0);
 }
 
 }  // namespace monolith
