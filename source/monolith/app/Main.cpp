@@ -1,3 +1,6 @@
+#include <sys/wait.h>
+
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -33,7 +36,25 @@ void Main() {
       break;
     }
 
-    executeCommand(args);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    const pid_t pid = CreateChildProcess(args);
+
+    int status = 0;
+    if (waitpid(pid, &status, 0) == -1) {
+      std::cout << "Failed to wait for child process\n";
+      continue;
+    }
+
+    if (WIFEXITED(status)) {
+      std::cout << "----------------------------------------\n";
+      auto end = std::chrono::high_resolution_clock::now();
+      const std::chrono::duration<double> elapsed = end - start;
+      std::cout << "Process time: " << elapsed.count() << " seconds\n";
+
+    } else {
+      std::cout << "Child process did not exit normally\n";
+    }
   }
 }
 

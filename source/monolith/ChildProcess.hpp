@@ -3,13 +3,9 @@
 #include <vector>
 
 namespace monolith {
-int executeCommand(const std::vector<std::string>& args);
+int CloneFunction(void* arg);
 
-char** prepareArguments(const std::vector<std::string>& args);
+pid_t CreateChildProcess(const std::vector<std::string>& arguments);
 
-void freeArguments(char** args);
-
-int childFunction(void* arg);
-
-constexpr size_t STACK_SIZE = 1024 * 1024;  // 1 МБ
+constexpr size_t STACKSIZE = 1048576;  // 1 МБ
 };  // namespace monolith

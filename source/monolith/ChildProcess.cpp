@@ -1,88 +1,41 @@
-#include "monolith/ChildProcess.hpp"
+#include "ChildProcess.hpp"
 
 #include <sched.h>
-#include <sys/wait.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+#include <csignal>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
-#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace monolith {
-struct ChildArgs {
-  char** args;
-};
 
-int childFunction(void* arg) {
-  auto* childArgs = reinterpret_cast<ChildArgs*>(arg);
-  if (execvp(childArgs->args[0], childArgs->args) == -1) {
-    perror("execvp failed");
+int CloneFunction(void* arg) {
+  const char** args = static_cast<const char**>(arg);
+  if (execvp(args[0], const_cast<char* const*>(args)) == -1) {
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
 }
 
-char** prepareArguments(const std::vector<std::string>& args) {
-  char** cArgs = new char*[args.size() + 1];
-  for (size_t i = 0; i < args.size(); ++i) {
-    cArgs[i] = strdup(args[i].c_str());
+pid_t CreateChildProcess(const std::vector<std::string>& arguments) {
+  std::vector<const char*> argv;
+  argv.reserve(arguments.size() + 2);
+  for (const auto& arg : arguments) {
+    argv.push_back(arg.c_str());
   }
-  cArgs[args.size()] = nullptr;
-  return cArgs;
+  argv.push_back(nullptr);
+
+  auto stack = std::make_unique<char[]>(STACKSIZE);
+  void* stack_top = stack.get() + STACKSIZE;
+
+  const pid_t pid = clone(CloneFunction, stack_top, SIGCHLD, argv.data());
+
+  return pid;
 }
 
-void freeArguments(char** args) {
-  if (!args)
-    return;
-  for (size_t i = 0; args[i] != nullptr; ++i) {
-    free(args[i]);
-  }
-  delete[] args;
-}
-
-int executeCommand(const std::vector<std::string>& args) {
-  if (args.empty()) {
-    std::cerr << "No command provided.\n";
-    return -1;
-  }
-
-  char** cArgs = prepareArguments(args);
-
-  char* stack = static_cast<char*>(malloc(STACK_SIZE));
-  if (!stack) {
-    perror("malloc failed");
-    freeArguments(cArgs);
-    return -1;
-  }
-
-  char* stackTop = stack + STACK_SIZE;
-
-  ChildArgs childArgs = {cArgs};
-
-  struct timespec start, end;
-  clock_gettime(CLOCK_MONOTONIC, &start);
-
-  pid_t pid = clone(childFunction, stackTop, SIGCHLD, &childArgs);
-  if (pid < 0) {
-    perror("clone failed");
-    free(stack);
-    freeArguments(cArgs);
-    return -1;
-  }
-
-  int status;
-  if (waitpid(pid, &status, 0) == -1) {
-    perror("waitpid failed");
-  }
-
-  clock_gettime(CLOCK_MONOTONIC, &end);
-
-  double elapsedTime = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-  std::cout << "Execution time: " << elapsedTime << " seconds\n";
-
-  free(stack);
-  freeArguments(cArgs);
-
-  return WEXITSTATUS(status);
-}
 }  // namespace monolith

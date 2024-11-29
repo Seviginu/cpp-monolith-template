@@ -11,8 +11,8 @@ macro(MONOLITH_BENCH_DECLARE suffix file)
     target_link_libraries(
         ${MONOLITH_BENCH_TARGET_BASE}-${suffix}
         ${PROJECT_NAME}
-        benchmark::benchmark
     )
 endmacro()
 
-MONOLITH_BENCH_DECLARE(hello-world HelloWorldBench.cpp)
+MONOLITH_BENCH_DECLARE(io IOBenchmark.cpp)
+MONOLITH_BENCH_DECLARE(factorize FactorizeBenchmark.cpp)

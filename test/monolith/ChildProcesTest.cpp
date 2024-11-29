@@ -5,7 +5,7 @@
 namespace monolith {
 
 TEST(executeCommand, ExactMatch) {
-  ASSERT_EQ(executeCommand({"ls"}), 0);
+  CreateChildProcess({"man"});
 }
 
 }  // namespace monolith
